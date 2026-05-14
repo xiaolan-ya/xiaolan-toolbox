@@ -143,7 +143,9 @@ async function generatePromptFromReferenceImages(_, input) {
     throw new Error("请先添加至少一张参考图。");
   }
 
-  const imageDataUrls = await buildReferenceImageDataUrls(referenceImagePaths);
+  const imageDataUrls = await buildReferenceImageDataUrls(referenceImagePaths, {
+    prepareForVision: true,
+  });
   const instruction = buildReferencePromptInstruction(input?.prompt || "");
   const model = normalizeVisionPromptModel(
     input?.referencePromptModel || config.referencePromptModel || DEFAULT_VISION_PROMPT_MODEL

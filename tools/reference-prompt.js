@@ -18,6 +18,7 @@ function buildReferencePromptInstruction(currentPrompt = "") {
     "The reference images are the source of truth. Describe only what is visually supported by the images.",
     "If the image is a logo, title card, typography sample, or text-only design, write a prompt for recreating that typography or logo design only.",
     "For typography/logo references, focus on exact visible text, font shape, stroke weight, layout, color, texture, small decorative marks, background treatment, and readability.",
+    "If the image has a transparent background, white text, or very light strokes, identify the visible typography and describe the intended transparent or dark-preview background instead of calling the image blank or all white.",
     "Do not turn typography/logo references into posters, characters, game covers, landscapes, scenes, or cinematic illustrations.",
     "Do not infer any franchise, game, movie, brand, character, lore, or IP unless it is explicitly visible in the image text.",
     "Include the main subject, style, composition, camera angle, lighting, color palette, material details, background, and mood only when they are clearly visible.",

@@ -12,6 +12,9 @@ const REFERENCE_IMAGE_MIN_JPEG_QUALITY = 64;
 const REFERENCE_BOARD_MAX_WIDTH = 1600;
 const REFERENCE_BOARD_MAX_HEIGHT = 1600;
 const REFERENCE_BOARD_JPEG_QUALITY = 78;
+const REFERENCE_VISION_JPEG_QUALITY = 90;
+const REFERENCE_VISION_BACKGROUND = "#0d1726";
+const REFERENCE_VISION_CHECKER = "#17263a";
 
 function getMimeTypeForFile(filePath) {
   const extension = path.extname(filePath).toLowerCase();
@@ -139,6 +142,53 @@ function buildReferenceBoardPart(imageParts) {
     buffer,
     fileName: "reference-board.jpg",
     originalFileName: "reference-board.jpg",
+    mimeType: "image/jpeg",
+    size: buffer.length,
+  };
+}
+
+function buildVisionReadableReferenceSvg(dataUrl, dimensions) {
+  const width = Math.max(1, Number(dimensions?.width) || 1);
+  const height = Math.max(1, Number(dimensions?.height) || 1);
+  return [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
+    `<defs>`,
+    `<pattern id="checker" width="48" height="48" patternUnits="userSpaceOnUse">`,
+    `<rect width="48" height="48" fill="${REFERENCE_VISION_BACKGROUND}"/>`,
+    `<rect width="24" height="24" fill="${REFERENCE_VISION_CHECKER}"/>`,
+    `<rect x="24" y="24" width="24" height="24" fill="${REFERENCE_VISION_CHECKER}"/>`,
+    `</pattern>`,
+    `</defs>`,
+    `<rect width="100%" height="100%" fill="url(#checker)"/>`,
+    `<image href="${dataUrl}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet"/>`,
+    `</svg>`,
+  ].join("");
+}
+
+function buildVisionReadableReferencePart(imagePart) {
+  if (!nativeImage?.createFromBuffer || !nativeImage?.createFromDataURL || !imagePart?.buffer) {
+    return imagePart;
+  }
+
+  const dimensions = getImagePartDimensions(imagePart);
+  if (!dimensions) {
+    return imagePart;
+  }
+
+  const dataUrl = `data:${imagePart.mimeType};base64,${imagePart.buffer.toString("base64")}`;
+  const svg = buildVisionReadableReferenceSvg(dataUrl, dimensions);
+  const flattened = nativeImage.createFromDataURL(
+    `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`
+  );
+  if (!flattened || flattened.isEmpty()) {
+    return imagePart;
+  }
+
+  const buffer = flattened.toJPEG(REFERENCE_VISION_JPEG_QUALITY);
+  return {
+    buffer,
+    fileName: buildCompressedReferenceFileName(imagePart.originalFileName || imagePart.fileName, ".jpg"),
+    originalFileName: imagePart.originalFileName || imagePart.fileName,
     mimeType: "image/jpeg",
     size: buffer.length,
   };
@@ -298,9 +348,11 @@ function buildMultipartImageRequestBody(payload, imageParts) {
   };
 }
 
-async function buildReferenceImageDataUrls(referenceImagePaths) {
+async function buildReferenceImageDataUrls(referenceImagePaths, options = {}) {
   const imageDataUrls = [];
-  const files = await buildReferenceImageParts(referenceImagePaths);
+  const files = options.prepareForVision
+    ? (await buildReferenceImageParts(referenceImagePaths)).map(buildVisionReadableReferencePart)
+    : await buildReferenceImageParts(referenceImagePaths);
   const referenceBoard = files.length > 1 ? buildReferenceBoardPart(files) : null;
   const uploadFiles = referenceBoard ? [referenceBoard] : files;
 
@@ -336,6 +388,9 @@ module.exports = {
   REFERENCE_BOARD_MAX_WIDTH,
   REFERENCE_BOARD_MAX_HEIGHT,
   REFERENCE_BOARD_JPEG_QUALITY,
+  REFERENCE_VISION_JPEG_QUALITY,
+  REFERENCE_VISION_BACKGROUND,
+  REFERENCE_VISION_CHECKER,
   getMimeTypeForFile,
   getScaledImageSize,
   buildCompressedReferenceFileName,
@@ -344,6 +399,8 @@ module.exports = {
   getImagePartDimensions,
   fitRectIntoBox,
   buildReferenceBoardPart,
+  buildVisionReadableReferenceSvg,
+  buildVisionReadableReferencePart,
   compressReferenceImageBuffer,
   buildReferenceImageParts,
   escapeMultipartFieldValue,
