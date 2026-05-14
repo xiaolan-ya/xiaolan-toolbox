@@ -15,6 +15,8 @@ const REFERENCE_BOARD_JPEG_QUALITY = 78;
 const REFERENCE_VISION_JPEG_QUALITY = 90;
 const REFERENCE_VISION_BACKGROUND = "#0d1726";
 const REFERENCE_VISION_CHECKER = "#17263a";
+const REFERENCE_VISION_BACKGROUND_RGBA = [13, 23, 38, 255];
+const REFERENCE_VISION_CHECKER_RGBA = [23, 38, 58, 255];
 
 function getMimeTypeForFile(filePath) {
   const extension = path.extname(filePath).toLowerCase();
@@ -165,14 +167,64 @@ function buildVisionReadableReferenceSvg(dataUrl, dimensions) {
   ].join("");
 }
 
+function compositeBitmapOnVisionBackground(bitmap, width, height) {
+  const output = Buffer.alloc(bitmap.length);
+  const stride = width * 4;
+
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const offset = y * stride + x * 4;
+      const checker = (Math.floor(x / 24) + Math.floor(y / 24)) % 2 === 0;
+      const background = checker ? REFERENCE_VISION_CHECKER_RGBA : REFERENCE_VISION_BACKGROUND_RGBA;
+      const alpha = bitmap[offset + 3] / 255;
+
+      output[offset] = Math.round(bitmap[offset] * alpha + background[0] * (1 - alpha));
+      output[offset + 1] = Math.round(bitmap[offset + 1] * alpha + background[1] * (1 - alpha));
+      output[offset + 2] = Math.round(bitmap[offset + 2] * alpha + background[2] * (1 - alpha));
+      output[offset + 3] = 255;
+    }
+  }
+
+  return output;
+}
+
 function buildVisionReadableReferencePart(imagePart) {
   if (!nativeImage?.createFromBuffer || !nativeImage?.createFromDataURL || !imagePart?.buffer) {
+    return imagePart;
+  }
+
+  const image = nativeImage.createFromBuffer(imagePart.buffer);
+  if (image.isEmpty()) {
     return imagePart;
   }
 
   const dimensions = getImagePartDimensions(imagePart);
   if (!dimensions) {
     return imagePart;
+  }
+
+  if (nativeImage?.createFromBitmap && typeof image.toBitmap === "function") {
+    const bitmap = image.toBitmap();
+    if (Buffer.isBuffer(bitmap) && bitmap.length === dimensions.width * dimensions.height * 4) {
+      const composited = nativeImage.createFromBitmap(
+        compositeBitmapOnVisionBackground(bitmap, dimensions.width, dimensions.height),
+        {
+          width: dimensions.width,
+          height: dimensions.height,
+          scaleFactor: 1,
+        }
+      );
+      if (composited && !composited.isEmpty()) {
+        const buffer = composited.toJPEG(REFERENCE_VISION_JPEG_QUALITY);
+        return {
+          buffer,
+          fileName: buildCompressedReferenceFileName(imagePart.originalFileName || imagePart.fileName, ".jpg"),
+          originalFileName: imagePart.originalFileName || imagePart.fileName,
+          mimeType: "image/jpeg",
+          size: buffer.length,
+        };
+      }
+    }
   }
 
   const dataUrl = `data:${imagePart.mimeType};base64,${imagePart.buffer.toString("base64")}`;
@@ -391,6 +443,8 @@ module.exports = {
   REFERENCE_VISION_JPEG_QUALITY,
   REFERENCE_VISION_BACKGROUND,
   REFERENCE_VISION_CHECKER,
+  REFERENCE_VISION_BACKGROUND_RGBA,
+  REFERENCE_VISION_CHECKER_RGBA,
   getMimeTypeForFile,
   getScaledImageSize,
   buildCompressedReferenceFileName,
@@ -400,6 +454,7 @@ module.exports = {
   fitRectIntoBox,
   buildReferenceBoardPart,
   buildVisionReadableReferenceSvg,
+  compositeBitmapOnVisionBackground,
   buildVisionReadableReferencePart,
   compressReferenceImageBuffer,
   buildReferenceImageParts,
