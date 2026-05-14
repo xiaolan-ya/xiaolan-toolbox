@@ -1,0 +1,70 @@
+name: Mac build and test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "core/**"
+      - "renderer/**"
+      - "tools/**"
+      - "build/**"
+      - "main.js"
+      - "preload.js"
+      - "package.json"
+      - "package-lock.json"
+      - "build-mac-package.sh"
+      - ".github/workflows/mac-build-test.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+            artifact: xiaolan-mac-arm64
+          - runner: macos-15-intel
+            arch: x64
+            artifact: xiaolan-mac-x64
+
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      ELECTRON_ENABLE_LOGGING: "1"
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test desktop app on macOS
+        run: npm run test:mac
+
+      - name: Build unsigned macOS package
+        run: npx electron-builder --mac dmg zip --${{ matrix.arch }} --publish never --config.directories.output=dist-mac-${{ matrix.arch }}
+
+      - name: Upload macOS package to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: mac-test-${{ github.run_id }}
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --title "Mac test ${{ github.run_id }}" --notes "Unsigned macOS test build"
+          gh release upload "$RELEASE_TAG" dist-mac-${{ matrix.arch }}/*.dmg dist-mac-${{ matrix.arch }}/*.zip dist-mac-${{ matrix.arch }}/builder-debug.yml --clobber

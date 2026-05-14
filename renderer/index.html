@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小蓝工具箱</title>
+    <link rel="icon" type="image/png" href="./app-avatar.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./prompt-library-layout.css" />
+    <link rel="stylesheet" href="./image-inspector.css" />
+    <link rel="stylesheet" href="./canvas-workbench.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="studio-shell">
+        <aside class="control-panel">
+          <div class="control-panel-inner">
+            <nav class="workspace-tabs" aria-label="功能版块">
+              <button id="workspace-tab-generate" class="workspace-tab is-active" type="button" data-workspace-tab="generate">
+                <span class="workspace-tab-icon workspace-tab-icon-generate" aria-hidden="true"></span>
+                <strong>生图</strong>
+              </button>
+              <button id="workspace-tab-ideas" class="workspace-tab" type="button" data-workspace-tab="ideas">
+                <span class="workspace-tab-icon workspace-tab-icon-ideas" aria-hidden="true"></span>
+                <strong>灵感</strong>
+              </button>
+              <button id="workspace-tab-canvas" class="workspace-tab" type="button" data-workspace-tab="canvas">
+                <span class="workspace-tab-icon workspace-tab-icon-canvas" aria-hidden="true"></span>
+                <strong>画布</strong>
+              </button>
+              <button id="workspace-tab-gallery" class="workspace-tab" type="button" data-workspace-tab="gallery">
+                <span class="workspace-tab-icon workspace-tab-icon-gallery" aria-hidden="true"></span>
+                <strong>图库</strong>
+              </button>
+              <button id="workspace-tab-assets" class="workspace-tab" type="button" data-workspace-tab="assets">
+                <span class="workspace-tab-icon workspace-tab-icon-assets" aria-hidden="true"></span>
+                <strong>设置</strong>
+              </button>
+            </nav>
+            <div class="control-panel-scroll">
+            <section class="workspace-intro workspace-intro-gallery" data-workspace-panel="gallery">
+              <div class="workspace-intro-copy">
+                <p class="workspace-kicker">Gallery</p>
+                <h2>图库</h2>
+                <p>集中查看自己生成过的图片，可继续编辑、做同款或放入画布。</p>
+              </div>
+            </section>
+
+            <section class="workspace-intro workspace-intro-generate is-removed-panel" data-workspace-panel="generate" hidden>
+              <div class="workspace-intro-copy">
+                <p class="workspace-kicker">Generate</p>
+                <h2>生图</h2>
+                <p>模式、提示词和参数放在一条工作流里，减少切换时的打断感。</p>
+              </div>
+            </section>
+
+            <section class="composer-card" data-workspace-panel="generate">
+              <div class="panel-head">
+                <div class="title-block">
+                  <p class="eyebrow">Prompt</p>
+                  <h2>提示词</h2>
+                </div>
+                <div class="prompt-actions">
+                  <button id="open-prompt-library" type="button" class="secondary-button compact-button">提示词大全</button>
+                  <button id="toggle-prompt-visibility" type="button" class="ghost-button compact-button">展开提示词</button>
+                </div>
+              </div>
+              <div class="prompt-editor" id="prompt-editor" hidden>
+                <label class="field field-full field-no-gap">
+                  <textarea
+                    id="prompt"
+                    placeholder="例如：做一张蓝白色科技工具箱封面，简洁但有高级感，柔和边缘光，适合产品宣传。"
+                  >这是一张艾尔登法环史诗级黑暗奇幻风格的杂志封面。画面中心是一位背对观者的角色，拥有及腰的银白色长发，发丝随风飘动，身披华丽厚重的深红色丝绒长袍，袍子上有精致的金色刺绣和装饰链条。人物把黄金律法大剑抬起对准王座。
+
+人物站在宏伟的台阶下方，正面朝一座艾尔登法环风格的内部空间，台阶向上延伸至一个被神圣光芒笼罩的王座。建筑极其恢弘，充满复杂雕刻、高耸立柱、拱顶结构与悬挂的旗帜，整体呈现艾尔登法环的风格。
+
+光线从高处倾泻而下，形成强烈的体积光效果，空气中漂浮着金色尘埃与火星，营造神圣、庄严且压迫的氛围。整体色调以金色与深红色为主，高对比度，电影级光影，细节极其丰富，超写实质感。
+
+画面采用杂志封面设计风格：顶部有大标题“ELDEN KING”（红色大号衬线字体），画面左侧有分栏小标题与装饰性图标，底部带有条形码和设计排版元素，整体排版高级、平衡、具有专业出版感。右下角有斜着的 by xiaolan的红色手写体
+
+构图为居中对称，利用台阶作为引导线，增强纵深感和史诗感，人物披风具有强烈动态效果。</textarea>
+                </label>
+              </div>
+              <div id="prompt-collapsed" class="prompt-preview">
+                <span id="prompt-preview-text">已收起</span>
+              </div>
+            </section>
+
+            <section class="workspace-intro workspace-intro-ideas is-removed-panel" data-workspace-panel="ideas" hidden>
+              <div class="workspace-intro-copy">
+                <p class="workspace-kicker">Ideas</p>
+                <h2>灵感</h2>
+              </div>
+            </section>
+
+            <section class="compact-card inspiration-card" data-workspace-panel="ideas">
+              <div class="panel-head">
+                <div class="title-block">
+                  <p class="eyebrow">Library</p>
+                  <h2>提示词大全</h2>
+                </div>
+              </div>
+              <div class="inspiration-copy">
+                <div class="inspiration-example-grid" aria-label="灵感例图">
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-001" aria-label="产品主图灵感">
+                    <img src="./prompt-covers/prompt-001.jpg" alt="" loading="lazy" />
+                    <span>产品</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-002" aria-label="电商主图灵感">
+                    <img src="./prompt-covers/prompt-002.jpg" alt="" loading="lazy" />
+                    <span>电商</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-003" aria-label="护肤主图灵感">
+                    <img src="./prompt-covers/prompt-003.jpg" alt="" loading="lazy" />
+                    <span>护肤</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-004" aria-label="户外鞋卖点灵感">
+                    <img src="./prompt-covers/prompt-004.jpg" alt="" loading="lazy" />
+                    <span>户外</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-005" aria-label="海报排版灵感">
+                    <img src="./prompt-covers/prompt-005.jpg" alt="" loading="lazy" />
+                    <span>海报</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-006" aria-label="文字海报灵感">
+                    <img src="./prompt-covers/prompt-006.jpg" alt="" loading="lazy" />
+                    <span>文字</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-007" aria-label="科技海报灵感">
+                    <img src="./prompt-covers/prompt-007.jpg" alt="" loading="lazy" />
+                    <span>科技</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-008" aria-label="国潮海报灵感">
+                    <img src="./prompt-covers/prompt-008.jpg" alt="" loading="lazy" />
+                    <span>国潮</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-009" aria-label="品牌视觉灵感">
+                    <img src="./prompt-covers/prompt-009.jpg" alt="" loading="lazy" />
+                    <span>品牌</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-010" aria-label="户外广告灵感">
+                    <img src="./prompt-covers/prompt-010.jpg" alt="" loading="lazy" />
+                    <span>广告</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-011" aria-label="香氛品牌灵感">
+                    <img src="./prompt-covers/prompt-011.jpg" alt="" loading="lazy" />
+                    <span>香氛</span>
+                  </button>
+                  <button type="button" class="inspiration-example inspiration-example-cover" data-inspiration-cover="prompt-012" aria-label="新能源发布会灵感">
+                    <img src="./prompt-covers/prompt-012.jpg" alt="" loading="lazy" />
+                    <span>新能源</span>
+                  </button>
+                </div>
+                <div class="inspiration-side-box">
+                  <button type="button" class="inspiration-shortcut" data-inspiration-category="资产主图">产品主图</button>
+                  <button type="button" class="inspiration-shortcut" data-inspiration-category="海报排版">海报排版</button>
+                  <button type="button" class="inspiration-shortcut" data-inspiration-category="封面配图">封面杂志</button>
+                  <button type="button" class="inspiration-shortcut" data-inspiration-category="品牌视觉">品牌视觉</button>
+                </div>
+                <button id="open-prompt-library-secondary" type="button" class="secondary-button compact-button">打开灵感区</button>
+              </div>
+            </section>
+
+            <section id="reference-section" class="compact-card" data-workspace-panel="generate">
+              <div class="panel-head no-bottom">
+                <div class="title-block">
+                  <p class="eyebrow">Reference</p>
+                  <h2>参考图片</h2>
+                </div>
+                <span id="reference-count" class="count-pill">0/16</span>
+              </div>
+              <div id="reference-drop-zone" class="upload-zone reference-drop-zone">
+                <div id="reference-files" class="reference-files empty">当前还没有参考图。</div>
+                <div class="toolbar-row">
+                  <button id="generate-reference-prompt" type="button" class="secondary-button compact-button">参考图生成词</button>
+                  <button id="pick-reference-images" type="button" class="secondary-button compact-button">添加图片</button>
+                  <button id="clear-reference-images" type="button" class="ghost-button compact-button">清空</button>
+                </div>
+                <p>可以一次拖入多张参考图，也可以点击添加图片，最多保留 16 张。</p>
+              </div>
+            </section>
+
+            <section class="tool-grid" data-workspace-panel="generate">
+              <article class="compact-card size-card">
+                <button id="toggle-size-panel" type="button" class="card-toggle">
+                  <div class="title-block">
+                    <p class="eyebrow">Size</p>
+                    <h2>生成尺寸</h2>
+                  </div>
+                  <div class="toggle-meta">
+                    <span id="size-display-tag" class="section-tag">自动</span>
+                    <span id="size-chevron" class="chevron">▾</span>
+                  </div>
+                </button>
+                <div id="size-panel" class="collapsible-panel" hidden>
+                  <div class="size-grid">
+                    <button class="size-chip is-active" type="button" data-size="auto">
+                      <strong class="size-chip-label">自动</strong>
+                      <span>交给模型判断</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="1024x1024">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-square"></span><span>1:1</span></strong>
+                      <span>1K（1024×1024）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="1536x1024">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-landscape"></span><span>3:2</span></strong>
+                      <span>1.5K（1536×1024）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="1024x1536">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-portrait"></span><span>2:3</span></strong>
+                      <span>1.5K（1024×1536）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="2048x2048">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-square"></span><span>1:1</span></strong>
+                      <span>2K（2048×2048）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="2048x1152">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-wide"></span><span>16:9</span></strong>
+                      <span>2K（2048×1152）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="3840x2160">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-wide"></span><span>16:9</span></strong>
+                      <span>4K（3840×2160）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="2160x3840">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-tall"></span><span>9:16</span></strong>
+                      <span>4K（2160×3840）</span>
+                    </button>
+                    <button class="size-chip" type="button" data-size="custom">
+                      <strong class="size-chip-label"><span class="ratio-shape ratio-custom"></span><span>自定义</span></strong>
+                      <span>手动输入宽高</span>
+                    </button>
+                  </div>
+                  <div class="custom-size-panel" id="custom-size-panel">
+                    <label class="field">
+                      <span>宽度</span>
+                      <input id="custom-width" type="number" min="16" max="3840" step="16" value="1024" />
+                    </label>
+                    <label class="field">
+                      <span>高度</span>
+                      <input id="custom-height" type="number" min="16" max="3840" step="16" value="1024" />
+                    </label>
+                    <button id="apply-custom-size" type="button" class="secondary-button compact-button">应用自定义尺寸</button>
+                    <p class="field-hint" id="custom-size-hint">宽高需为 16 的倍数，最长边不超过 3840，比例不超过 3:1。</p>
+                  </div>
+                </div>
+              </article>
+
+              <article class="compact-card param-card">
+                <button id="toggle-param-panel" type="button" class="card-toggle">
+                  <div class="title-block">
+                    <p class="eyebrow">Quality</p>
+                    <h2>生成参数</h2>
+                  </div>
+                  <div class="toggle-meta">
+                    <span class="section-tag">默认高质量</span>
+                    <span id="param-chevron" class="chevron">▾</span>
+                  </div>
+                </button>
+                <div id="param-panel" class="collapsible-panel" hidden>
+                  <div class="mini-grid">
+                    <label class="field">
+                      <span>质量</span>
+                      <select id="quality">
+                        <option value="low">low</option>
+                        <option value="medium">medium</option>
+                        <option value="high" selected>high</option>
+                      </select>
+                    </label>
+
+                    <label class="field">
+                      <span>格式</span>
+                      <select id="output-format">
+                        <option value="png" selected>png</option>
+                        <option value="jpeg">jpeg</option>
+                        <option value="webp">webp</option>
+                      </select>
+                    </label>
+
+                    <label class="field">
+                      <span>并发上限</span>
+                      <input id="count" type="number" min="1" max="16" value="16" />
+                    </label>
+
+                    <label class="field">
+                      <span>当前尺寸</span>
+                      <input id="size-display" type="text" value="自动（默认）" readonly />
+                    </label>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <pre id="response-json" class="response-json" data-workspace-panel="generate" hidden>暂无结果。</pre>
+
+            </div>
+            <section class="action-card" data-workspace-panel="generate">
+              <div class="action-status-bar">
+                <span class="status-dot" id="status-dot"></span>
+                <strong id="mode-indicator">直接生成</strong>
+                <span id="status-text">准备开始创作</span>
+              </div>
+              <div class="action-controls">
+                <button id="generate-button" type="button" class="primary-button action-button">
+                  <span class="button-spinner" id="button-spinner" hidden></span>
+                  <span id="generate-button-text">开始创作</span>
+                </button>
+                <button id="pause-generation-button" type="button" class="secondary-button action-pause-button" disabled>暂停</button>
+              </div>
+            </section>
+          </div>
+        </aside>
+
+        <main class="preview-panel">
+          <form id="settings-form" class="settings-panel settings-main-card collapsible-panel" data-main-workspace="assets" hidden>
+            <div class="panel-head">
+              <div class="title-block">
+                <p class="eyebrow">Settings</p>
+                <h2>接口与保存位置</h2>
+                <p>设置 API、模型和本地保存目录。模型既可以从常用项里选，也可以直接输入自己的生图模型名。</p>
+              </div>
+            </div>
+            <div class="settings-grid settings-main-grid">
+              <label class="field field-full">
+                <span>API 地址</span>
+                <input id="base-url" type="text" placeholder="https://www.packyapi.com" />
+              </label>
+
+              <label class="field field-full">
+                <span>API Key</span>
+                <input id="api-key" type="password" placeholder="sk-..." />
+              </label>
+
+              <label class="field field-full">
+                <span>模型</span>
+                <div class="inline-field model-inline-field">
+                  <input id="model" type="text" list="model-options" value="gpt-image-2" placeholder="选择或输入模型名" />
+                  <select id="model-select" aria-label="选择生图模型">
+                    <option value="">选择模型</option>
+                  </select>
+                  <button id="refresh-models-button" type="button" class="secondary-button compact-button">读取生图模型</button>
+                </div>
+                <datalist id="model-options">
+                  <option value="gpt-image-2"></option>
+                  <option value="gpt-image-1.5"></option>
+                  <option value="gpt-image-1"></option>
+                  <option value="gpt-image-1-mini"></option>
+                  <option value="nano-banana"></option>
+                  <option value="nano-banana-pro"></option>
+                  <option value="banana"></option>
+                  <option value="banana-pro"></option>
+                  <option value="banana-image"></option>
+                  <option value="dall-e-3"></option>
+                  <option value="dall-e-2"></option>
+                  <option value="gemini-2.5-flash-image"></option>
+                </datalist>
+              </label>
+
+              <label class="field field-full">
+                <span>图片转提示词模型</span>
+                <div class="inline-field model-inline-field">
+                  <input id="reference-prompt-model" type="text" list="reference-prompt-model-options" placeholder="选择或输入可识图模型" />
+                  <select id="reference-prompt-model-select" aria-label="选择图片转提示词模型">
+                    <option value="">选择模型</option>
+                  </select>
+                  <button id="refresh-reference-models-button" type="button" class="secondary-button compact-button">读取识图模型</button>
+                </div>
+                <datalist id="reference-prompt-model-options">
+                  <option value="gpt-5.4"></option>
+                  <option value="gpt-5.4-mini"></option>
+                  <option value="gpt-5.3"></option>
+                  <option value="gpt-4o"></option>
+                  <option value="gemini-3.1-pro"></option>
+                  <option value="gemini-2.5-pro"></option>
+                  <option value="gemini-2.5-flash"></option>
+                  <option value="qwen-vl-plus"></option>
+                  <option value="qwen-vl-max"></option>
+                </datalist>
+              </label>
+
+              <label class="field field-full">
+                <span>图片转生成词 API Key</span>
+                <input id="reference-prompt-api-key" type="password" placeholder="留空沿用主 API Key" />
+              </label>
+
+              <label class="field field-full">
+                <span>图片转生成词接口地址</span>
+                <input
+                  id="reference-prompt-base-url"
+                  type="text"
+                  placeholder="留空沿用主 API 地址，也可单独填写端口或接口域名"
+                />
+              </label>
+
+              <label class="field field-full settings-output-field">
+                <span>输出目录</span>
+                <div class="inline-field">
+                  <input id="output-dir" type="text" />
+                  <button id="pick-output-dir" type="button" class="secondary-button compact-button">选择</button>
+                </div>
+              </label>
+            </div>
+            <div class="toolbar-row settings-main-actions">
+              <button id="save-settings" type="submit" class="secondary-button compact-button">保存设置</button>
+              <button id="open-output-dir" type="button" class="ghost-button compact-button">打开目录</button>
+            </div>
+          </form>
+
+          <section class="ideas-main-card" data-main-workspace="ideas" hidden>
+            <div class="ideas-main-head">
+              <div class="title-block">
+                <h2>灵感</h2>
+              </div>
+              <button id="open-prompt-library-main" type="button" class="secondary-button compact-button">打开灵感区</button>
+            </div>
+            <div class="ideas-poster-grid" aria-label="灵感海报墙">
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-001" aria-label="产品主图灵感海报">
+                <img src="./prompt-covers/prompt-001.jpg" alt="" loading="lazy" />
+                <span>产品主图</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-002" aria-label="电商主图灵感海报">
+                <img src="./prompt-covers/prompt-002.jpg" alt="" loading="lazy" />
+                <span>电商主图</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-003" aria-label="护肤主图灵感海报">
+                <img src="./prompt-covers/prompt-003.jpg" alt="" loading="lazy" />
+                <span>护肤主图</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-004" aria-label="户外鞋卖点灵感海报">
+                <img src="./prompt-covers/prompt-004.jpg" alt="" loading="lazy" />
+                <span>户外鞋</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-005" aria-label="海报排版灵感海报">
+                <img src="./prompt-covers/prompt-005.jpg" alt="" loading="lazy" />
+                <span>海报排版</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-006" aria-label="文字海报灵感海报">
+                <img src="./prompt-covers/prompt-006.jpg" alt="" loading="lazy" />
+                <span>文字海报</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-007" aria-label="科技海报灵感海报">
+                <img src="./prompt-covers/prompt-007.jpg" alt="" loading="lazy" />
+                <span>科技海报</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-008" aria-label="国潮海报灵感海报">
+                <img src="./prompt-covers/prompt-008.jpg" alt="" loading="lazy" />
+                <span>国潮海报</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-009" aria-label="品牌视觉灵感海报">
+                <img src="./prompt-covers/prompt-009.jpg" alt="" loading="lazy" />
+                <span>品牌视觉</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-010" aria-label="户外广告灵感海报">
+                <img src="./prompt-covers/prompt-010.jpg" alt="" loading="lazy" />
+                <span>户外广告</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-011" aria-label="香氛品牌灵感海报">
+                <img src="./prompt-covers/prompt-011.jpg" alt="" loading="lazy" />
+                <span>香氛品牌</span>
+              </button>
+              <button type="button" class="ideas-poster-card inspiration-example-cover" data-inspiration-cover="prompt-012" aria-label="新能源发布会灵感海报">
+                <img src="./prompt-covers/prompt-012.jpg" alt="" loading="lazy" />
+                <span>新能源</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="preview-stage-card" data-main-workspace="generate">
+            <div id="generation-progress-strip" class="generation-progress-strip" hidden>
+              <span class="generation-progress-dot" aria-hidden="true"></span>
+              <span>还有 <strong id="generation-pending-count">0</strong> 张图片在生成 · 已等待 <strong id="generation-elapsed-time">00:00</strong></span>
+            </div>
+            <div class="preview-head">
+              <div class="title-block">
+                <p class="eyebrow">Preview</p>
+                <h2>实时预览</h2>
+                <p id="result-summary">生成结果会优先显示在这里，点击缩略图可切换。</p>
+              </div>
+              <div class="preview-actions">
+                <button id="zoom-out-button" type="button" class="ghost-button compact-button" disabled>缩小</button>
+                <button id="zoom-in-button" type="button" class="ghost-button compact-button" disabled>放大</button>
+                <button id="reset-zoom-button" type="button" class="ghost-button compact-button" disabled>重置</button>
+                <button id="send-preview-to-canvas-button" type="button" class="secondary-button compact-button" disabled>放入画布</button>
+                <button id="use-preview-as-reference-button" type="button" class="secondary-button compact-button" disabled>设为参考图</button>
+                <button id="open-image-button" type="button" class="ghost-button compact-button" disabled>打开原图</button>
+                <button id="show-image-folder-button" type="button" class="ghost-button compact-button" disabled>打开文件夹</button>
+              </div>
+            </div>
+
+            <div id="preview-stage" class="preview-stage is-empty">
+              <button id="preview-prev-button" type="button" class="preview-page-button preview-page-prev" aria-label="上一张" disabled hidden></button>
+              <button id="preview-next-button" type="button" class="preview-page-button preview-page-next" aria-label="下一张" disabled hidden></button>
+              <img id="preview-image" alt="预览图" hidden />
+              <div id="preview-empty" class="preview-empty">
+                <strong>预览区</strong>
+                <span>生成完成后会直接在这里查看大图，双击或点一下可进入沉浸预览。</span>
+              </div>
+              <div id="preview-loader" class="preview-loader" hidden>
+                <span class="loader-ring"></span>
+                <span class="loader-text">正在生成图片...</span>
+              </div>
+            </div>
+
+            <aside id="image-inspector" class="image-inspector is-empty">
+              <div class="image-inspector-head">
+                <div class="title-block">
+                  <p class="eyebrow">Prompt</p>
+                  <h2>图片生成词</h2>
+                </div>
+                <span id="image-inspector-meta" class="section-tag">暂无图片</span>
+              </div>
+              <p id="image-inspector-prompt" class="image-inspector-prompt">选中一张生成图后，这里会显示当时使用的提示词和参数。</p>
+              <p id="image-inspector-file" class="image-inspector-file"></p>
+              <div class="image-inspector-actions">
+                <button id="image-inspector-copy" type="button" class="ghost-button compact-button" disabled>复制</button>
+                <button id="image-inspector-fill" type="button" class="ghost-button compact-button" disabled>编辑</button>
+                <button id="image-inspector-regenerate" type="button" class="secondary-button compact-button" disabled>做同款</button>
+                <button id="image-inspector-reference" type="button" class="secondary-button compact-button" disabled>设为参考图</button>
+                <button id="image-inspector-canvas" type="button" class="secondary-button compact-button" disabled>放入画布</button>
+              </div>
+            </aside>
+          </section>
+
+          <section class="history-card" data-main-workspace="gallery" hidden>
+            <div class="history-head">
+              <div class="title-block">
+                <p class="eyebrow">Assets</p>
+                <h2>图库</h2>
+              </div>
+              <div class="history-tools">
+                <button id="delete-selected-history-button" type="button" class="ghost-button compact-button" disabled>删除显示</button>
+                <button id="delete-selected-local-button" type="button" class="ghost-button compact-button" disabled>删除本地</button>
+                <button id="clear-history-button" type="button" class="ghost-button compact-button">清空历史</button>
+                <span class="section-tag" id="history-tag">0 条记录</span>
+              </div>
+            </div>
+
+            <div id="result-grid" class="history-strip"></div>
+          </section>
+
+          <div id="history-context-menu" class="history-context-menu" hidden>
+            <button type="button" data-history-menu-action="hide">删除显示</button>
+            <button type="button" data-history-menu-action="local">删除本地</button>
+          </div>
+
+          <section id="canvas-workbench-panel" class="canvas-workbench-card" data-main-workspace="canvas" hidden>
+            <div class="canvas-workbench-body">
+              <aside class="canvas-tool-rail">
+                <button id="canvas-pick-image" type="button" class="canvas-tool-button" title="添加图片到画布">＋</button>
+                <button id="canvas-delete-selected" type="button" class="canvas-tool-button" title="删除选中图片" disabled>删</button>
+                <button id="canvas-undo" type="button" class="canvas-tool-button" title="撤销">撤</button>
+                <button id="canvas-clear" type="button" class="canvas-tool-button" title="清空画布">清</button>
+              </aside>
+
+              <div id="canvas-drop-zone" class="canvas-stage-shell">
+                <canvas id="canvas-workbench-canvas"></canvas>
+                <div id="canvas-empty" class="canvas-empty">
+                  <strong>拖入图片开始排版</strong>
+                  <span>可以从本地、预览图或历史记录拖入，也可以点击上方添加图片。</span>
+                </div>
+                <div id="canvas-loading" class="canvas-loading" hidden>
+                  <span class="canvas-loading-ring"></span>
+                  <strong>正在生成当前选中图</strong>
+                  <span id="canvas-loading-text">正在发送原图并等待接口返回...</span>
+                </div>
+                <div id="canvas-selection-toolbar" class="canvas-selection-toolbar" hidden>
+                  <button id="canvas-selection-reference" type="button">作参考</button>
+                  <button id="canvas-selection-generate" type="button">生成</button>
+                  <button id="canvas-selection-edit" type="button">编辑</button>
+                </div>
+                <div id="canvas-context-menu" class="canvas-context-menu" hidden>
+                  <button type="button" data-canvas-action="duplicate">创建副本</button>
+                  <button type="button" data-canvas-action="copy-image">复制为图片</button>
+                  <button type="button" data-canvas-action="save-as">另存为</button>
+                  <button type="button" data-canvas-action="info">生成信息</button>
+                  <hr />
+                  <button type="button" data-canvas-action="flip-x">水平翻转</button>
+                  <button type="button" data-canvas-action="flip-y">垂直翻转</button>
+                  <hr />
+                  <button type="button" data-canvas-action="send-generate">发送到生图区</button>
+                  <button type="button" data-canvas-action="delete">删除</button>
+                </div>
+              </div>
+
+              <aside class="canvas-side-panel">
+                <div class="canvas-board-box">
+                  <label class="field field-full">
+                    <span>画布</span>
+                    <select id="canvas-board-select"></select>
+                  </label>
+                  <div class="canvas-board-actions">
+                    <button id="canvas-board-new" type="button" class="secondary-button compact-button">新建</button>
+                    <button id="canvas-board-delete" type="button" class="ghost-button compact-button">删除</button>
+                  </div>
+                </div>
+                <div class="canvas-selected-box">
+                  <p class="eyebrow">Selected</p>
+                  <strong id="canvas-selected-name">未选中图片</strong>
+                </div>
+                <label class="field field-full">
+                  <span>生成词</span>
+                  <textarea id="canvas-prompt" placeholder="这里使用左侧主提示词；也可以在这里临时修改后生成。"></textarea>
+                </label>
+                <div class="canvas-zoom-panel" aria-label="视图缩放">
+                  <span>视图缩放</span>
+                  <button id="canvas-zoom-out" type="button" class="canvas-tool-button canvas-zoom-out" title="缩小视图" aria-label="缩小视图">-</button>
+                  <button id="canvas-zoom-fit" type="button" class="canvas-zoom-label" title="适配视图" aria-label="适配视图">100%</button>
+                  <button id="canvas-zoom-in" type="button" class="canvas-tool-button canvas-zoom-in" title="放大视图" aria-label="放大视图">+</button>
+                </div>
+                <div class="canvas-side-actions">
+                  <button id="canvas-add-reference" type="button" class="secondary-button compact-button">选中图作参考</button>
+                  <button id="canvas-generate" type="button" class="primary-button compact-button">生成当前选中图</button>
+                </div>
+              </aside>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="lightbox" class="lightbox" hidden>
+      <div class="lightbox-backdrop"></div>
+      <div class="lightbox-panel">
+        <div class="lightbox-toolbar">
+          <div class="lightbox-meta">
+            <strong id="lightbox-title">预览图片</strong>
+            <span id="lightbox-scale-label">100%</span>
+          </div>
+          <div class="lightbox-actions">
+            <button id="lightbox-zoom-out" class="ghost-button compact-button" type="button">缩小</button>
+            <button id="lightbox-zoom-in" class="ghost-button compact-button" type="button">放大</button>
+            <button id="lightbox-reset" class="ghost-button compact-button" type="button">重置</button>
+            <button id="lightbox-close" class="icon-button close-button" type="button" aria-label="关闭预览">×</button>
+          </div>
+        </div>
+        <div class="lightbox-stage">
+          <img id="lightbox-image" alt="大图预览" />
+        </div>
+      </div>
+    </div>
+
+    <div id="canvas-info-modal" class="editor-modal canvas-info-modal" hidden>
+      <div class="lightbox-backdrop"></div>
+      <div class="canvas-info-panel">
+        <div class="canvas-info-head">
+          <strong>生成信息</strong>
+          <button id="canvas-info-close" class="icon-button close-button" type="button" aria-label="关闭生成信息">×</button>
+        </div>
+        <dl id="canvas-info-list" class="canvas-info-list"></dl>
+      </div>
+    </div>
+
+    <div id="reference-editor" class="editor-modal" hidden>
+      <div class="lightbox-backdrop"></div>
+      <div class="editor-panel">
+        <div class="editor-toolbar">
+          <div class="lightbox-meta">
+            <strong id="reference-editor-title">编辑参考图</strong>
+            <span id="reference-editor-meta">可使用画笔、矩形、圆圈和箭头做简单标注</span>
+          </div>
+          <div class="editor-toolbar-actions">
+            <div class="editor-tools">
+              <button
+                id="reference-tool-brush"
+                type="button"
+                class="ghost-button compact-button editor-tool is-active"
+                data-reference-tool="brush"
+              >
+                画笔
+              </button>
+              <button
+                id="reference-tool-rect"
+                type="button"
+                class="ghost-button compact-button editor-tool"
+                data-reference-tool="rect"
+              >
+                矩形
+              </button>
+              <button
+                id="reference-tool-circle"
+                type="button"
+                class="ghost-button compact-button editor-tool"
+                data-reference-tool="circle"
+              >
+                圆圈
+              </button>
+              <button
+                id="reference-tool-arrow"
+                type="button"
+                class="ghost-button compact-button editor-tool"
+                data-reference-tool="arrow"
+              >
+                箭头
+              </button>
+            </div>
+
+            <div class="editor-colors" aria-label="标注颜色">
+              <button
+                type="button"
+                class="editor-color is-active"
+                data-reference-color="#ff7c92"
+                aria-label="珊瑚红"
+              ></button>
+              <button
+                type="button"
+                class="editor-color"
+                data-reference-color="#ffd166"
+                aria-label="暖黄色"
+              ></button>
+              <button
+                type="button"
+                class="editor-color"
+                data-reference-color="#61dfb2"
+                aria-label="青绿色"
+              ></button>
+              <button
+                type="button"
+                class="editor-color"
+                data-reference-color="#7fc4ff"
+                aria-label="浅蓝色"
+              ></button>
+            </div>
+
+            <label class="editor-range" for="reference-editor-width">
+              <span>粗细 <strong id="reference-editor-width-value">6px</strong></span>
+              <input id="reference-editor-width" type="range" min="2" max="18" value="6" />
+            </label>
+
+            <button id="reference-editor-undo" type="button" class="ghost-button compact-button" disabled>
+              撤销
+            </button>
+            <button id="reference-editor-clear" type="button" class="ghost-button compact-button" disabled>
+              清空
+            </button>
+            <button id="reference-editor-save" type="button" class="secondary-button compact-button">
+              保存
+            </button>
+            <button
+              id="reference-editor-close"
+              class="icon-button close-button"
+              type="button"
+              aria-label="关闭编辑器"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-stage-shell">
+          <p class="editor-tip">编辑后的参考图会另存为新文件，并自动替换当前参考图。</p>
+          <div class="reference-editor-stage">
+            <canvas id="reference-editor-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="prompt-library-modal" class="prompt-library-modal" hidden>
+      <div class="lightbox-backdrop"></div>
+      <div class="prompt-library-panel">
+        <div class="prompt-library-head">
+          <div class="lightbox-meta">
+            <strong>提示词大全</strong>
+            <span id="prompt-library-count">0 条提示词</span>
+          </div>
+          <div class="prompt-library-actions">
+            <button id="prompt-library-tab-library" type="button" class="prompt-tab is-active">词库</button>
+            <button id="prompt-library-tab-builder" type="button" class="prompt-tab">自己选词</button>
+            <button id="prompt-library-close" class="icon-button close-button" type="button" aria-label="关闭提示词大全">×</button>
+          </div>
+        </div>
+
+        <div id="prompt-library-view" class="prompt-library-view">
+          <div class="prompt-library-tools">
+            <input id="prompt-library-search" type="search" placeholder="搜索分类、标题、风格、用途" />
+            <div id="prompt-category-list" class="prompt-category-list"></div>
+          </div>
+          <div id="prompt-card-grid" class="prompt-card-grid"></div>
+        </div>
+
+        <div id="prompt-builder-view" class="prompt-builder-view" hidden>
+          <div class="builder-example-strip" aria-label="自己选词例图">
+            <div class="builder-example builder-example-product"><span>主体</span></div>
+            <div class="builder-example builder-example-scene"><span>场景</span></div>
+            <div class="builder-example builder-example-light"><span>光线</span></div>
+            <div class="builder-example builder-example-detail"><span>细节</span></div>
+          </div>
+          <div class="prompt-builder-grid">
+            <label class="field">
+              <span>主体</span>
+              <input id="builder-subject" type="text" placeholder="例如：高端香水主视觉，或 青衣舞者站在水墨山河前" />
+            </label>
+            <label class="field">
+              <span>场景</span>
+              <select id="builder-scene"></select>
+            </label>
+            <label class="field">
+              <span>风格</span>
+              <select id="builder-style"></select>
+            </label>
+            <label class="field">
+              <span>光线</span>
+              <select id="builder-lighting"></select>
+            </label>
+            <label class="field">
+              <span>构图</span>
+              <select id="builder-composition"></select>
+            </label>
+            <label class="field">
+              <span>细节</span>
+              <select id="builder-detail"></select>
+            </label>
+          </div>
+          <textarea id="builder-output" class="builder-output" readonly></textarea>
+          <div class="prompt-builder-actions">
+            <button id="builder-randomize" type="button" class="ghost-button compact-button">换一组灵感</button>
+            <button id="builder-append" type="button" class="ghost-button compact-button">追加到当前提示词</button>
+            <button id="builder-use" type="button" class="secondary-button compact-button">直接使用这组词</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./prompt-library.js"></script>
+    <script src="./app-config.js"></script>
+    <script src="./image-inspector.js"></script>
+    <script src="./canvas-workbench.js"></script>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

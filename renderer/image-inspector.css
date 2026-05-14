@@ -1,0 +1,59 @@
+.image-inspector {
+  display: grid;
+  grid-template-rows: auto minmax(132px, 1fr) auto auto;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(130, 177, 255, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  contain: layout paint;
+}
+
+.image-inspector-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.image-inspector-prompt {
+  min-height: 132px;
+  max-height: 178px;
+  margin: 0;
+  overflow: auto;
+  color: #dceeff;
+  font-size: 13px;
+  line-height: 1.65;
+  word-break: break-word;
+}
+
+.image-inspector-file {
+  min-height: 24px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-inspector-actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.image-inspector-actions .compact-button {
+  min-height: 38px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .image-inspector-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

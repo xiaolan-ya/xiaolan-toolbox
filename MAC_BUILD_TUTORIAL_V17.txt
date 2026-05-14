@@ -1,0 +1,43 @@
+小蓝工具箱 Mac 端测试和打包教程 v17
+
+一、准备
+1. 确认 Mac 已安装 Node.js 24。
+2. 把 Windows 桌面上的 xiaolan-mac-test-v17-mac-safe.zip 传到 Mac 桌面。
+3. 打开 Mac 的“终端”。
+
+二、解压并进入项目
+注意：不要 cd 进入 .zip 文件，zip 需要先解压。
+
+cd ~/Desktop
+unzip xiaolan-mac-test-v17-mac-safe.zip
+cd xiaolan-mac-test-v17
+
+三、安装依赖
+
+npm install
+
+四、先测试
+
+npm run test:mac
+
+看到下面三项是 0 就表示 UI 测试通过：
+
+"layoutIssueCount": 0
+"clickIssueCount": 0
+"runtimeErrorCount": 0
+
+五、打 Mac 包
+
+CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist:mac:unsigned
+
+六、复制到桌面
+
+cp dist/*.dmg ~/Desktop/
+cp dist/*mac.zip ~/Desktop/
+
+七、这版修复内容
+1. 图片转生成词增加 Gemini 原生 generateContent 兼容。
+2. 读取模型后，接口返回的模型会进入真实下拉框，不再只靠输入框 datalist。
+3. 生图模型和图片转生成词模型都保留自由输入，也可以从下拉选择。
+4. 读取识图模型时不会再因为模型名不匹配而把接口返回模型全部筛掉。
+
