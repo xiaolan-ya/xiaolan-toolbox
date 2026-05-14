@@ -1630,7 +1630,7 @@ async function handleGenerateReferencePrompt() {
   try {
     const result = await window.desktopApi.generatePromptFromReferenceImages({
       config: getConfigFromForm(),
-      prompt: getPromptValue(),
+      prompt: "",
       referencePromptModel: elements.referencePromptModel ? elements.referencePromptModel.value.trim() : "",
       referenceImagePaths: state.referenceImagePaths,
     });

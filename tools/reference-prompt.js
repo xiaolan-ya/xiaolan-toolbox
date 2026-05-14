@@ -15,15 +15,21 @@ function buildReferencePromptInstruction(currentPrompt = "") {
   const prompt = String(currentPrompt || "").trim();
   const parts = [
     "Analyze the uploaded reference images and write one production-ready image generation prompt in Simplified Chinese.",
-    "Describe only what is visually supported by the images.",
-    "Include the main subject, scene, style, composition, camera angle, lighting, color palette, material details, background, and mood when they are clearly visible.",
-    "Do not invent important objects or text that are not actually visible.",
+    "The reference images are the source of truth. Describe only what is visually supported by the images.",
+    "If the image is a logo, title card, typography sample, or text-only design, write a prompt for recreating that typography or logo design only.",
+    "For typography/logo references, focus on exact visible text, font shape, stroke weight, layout, color, texture, small decorative marks, background treatment, and readability.",
+    "Do not turn typography/logo references into posters, characters, game covers, landscapes, scenes, or cinematic illustrations.",
+    "Do not infer any franchise, game, movie, brand, character, lore, or IP unless it is explicitly visible in the image text.",
+    "Include the main subject, style, composition, camera angle, lighting, color palette, material details, background, and mood only when they are clearly visible.",
+    "Do not invent important objects, text, names, characters, or styles that are not actually visible.",
     "Keep the result concrete, vivid, and directly usable for image generation.",
     "Aim for one clean paragraph of roughly 120 to 220 Chinese characters.",
   ];
 
   if (prompt) {
-    parts.push(`Blend this existing user intent when helpful: ${prompt}`);
+    parts.push(
+      `Optional user requirement, use only when it does not conflict with the images and never use it to replace visible image content: ${prompt}`
+    );
   }
 
   parts.push("Return only the final prompt text in Simplified Chinese.");

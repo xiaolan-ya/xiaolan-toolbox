@@ -1,6 +1,7 @@
 const assert = require("assert/strict");
 
 const {
+  buildReferencePromptInstruction,
   buildGeminiGenerateContentPayload,
   extractVisionPromptText,
 } = require("./reference-prompt");
@@ -36,6 +37,12 @@ function run() {
     }),
     "深海蓝色中文标题字 Logo，透明背景。"
   );
+
+  const instruction = buildReferencePromptInstruction("艾尔登法环史诗封面");
+  assert.match(instruction, /reference images are the source of truth/i);
+  assert.match(instruction, /typography\/logo references/i);
+  assert.match(instruction, /Do not infer any franchise/i);
+  assert.match(instruction, /never use it to replace visible image content/i);
 
   console.log("Reference prompt checks passed.");
 }
